@@ -52,6 +52,7 @@ lint = [
 style = [
     "ruff",
     "isort",
+    "black>=24.0.0",
 ]
 test = [
     "pytest>=7.4.0",

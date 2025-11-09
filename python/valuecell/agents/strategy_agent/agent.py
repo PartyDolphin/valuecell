@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from datetime import datetime
 from typing import AsyncGenerator, Dict, Optional
 
+from agno.agent import Agent
 from loguru import logger
 
 from valuecell.core.agent.responses import streaming
 from valuecell.core.types import BaseAgent, StreamResponse
 from valuecell.server.services import strategy_persistence
+from valuecell.adapters.models.factory import create_model
 
+from .constants import DEFAULT_AGENT_MODEL, DEFAULT_INITIAL_CAPITAL
 from .models import (
     ComponentType,
     StrategyStatus,
@@ -21,6 +25,18 @@ from .runtime import create_strategy_runtime_async
 
 class StrategyAgent(BaseAgent):
     """Top-level Strategy Agent integrating the decision coordinator."""
+
+    def __init__(self):
+        super().__init__()
+        try:
+            parser_model = create_model()
+            self.parser_agent = Agent(
+                model=parser_model,
+                output_schema=UserRequest,
+                markdown=False,
+            )
+        except Exception:
+            self.parser_agent = None
 
     async def _wait_until_marked_running(
         self, strategy_id: str, timeout_s: int = 300
@@ -107,6 +123,13 @@ class StrategyAgent(BaseAgent):
         except Exception:
             logger.exception("Error persisting cycle results for {}", strategy_id)
 
+    async def _parse_strategy_request(self, query: str) -> UserRequest:
+        if not self.parser_agent:
+            raise ValueError("Parser agent not initialized")
+        parse_prompt = f'Parse the user query and extract strategy configuration: "{query}". Extract symbols (format: SYMBOL-USD), initial_capital (default: {DEFAULT_INITIAL_CAPITAL}), and other UserRequest fields.'
+        response = await self.parser_agent.arun(parse_prompt)
+        return response.content
+
     async def stream(
         self,
         query: str,
@@ -116,11 +139,8 @@ class StrategyAgent(BaseAgent):
     ) -> AsyncGenerator[StreamResponse, None]:
         try:
             request = UserRequest.model_validate_json(query)
-        except ValueError as exc:
-            logger.exception("StrategyAgent received invalid payload")
-            yield streaming.message_chunk(str(exc))
-            yield streaming.done()
-            return
+        except (ValueError, json.JSONDecodeError):
+            request = await self._parse_strategy_request(query)
 
         runtime = await create_strategy_runtime_async(request)
         strategy_id = runtime.strategy_id
