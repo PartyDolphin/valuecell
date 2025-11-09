@@ -1,0 +1,56 @@
+{
+  "name": "AutoTradingAgent",
+  "display_name": "Auto Trading Agent",
+  "url": "http://localhost:10002/",
+  "description": "Automated crypto trading agent with technical analysis and position management. Supports multiple trading instances per session with independent configurations.",
+  "capabilities": {
+    "streaming": true,
+    "push_notifications": true
+  },
+  "skills": [
+    {
+      "id": "auto_trading",
+      "name": "Auto Trading",
+      "description": "Automated cryptocurrency trading with AI-enhanced signals, technical analysis, and position management.",
+      "examples": [
+        "Trade Bitcoin and Ethereum with $50000",
+        "Start auto trading BTC-USD with AI signals",
+        "Trade BTC, ETH, SOL with 100000 capital using DeepSeek model"
+      ],
+      "tags": ["trading", "crypto", "automated", "technical-analysis", "ai-signals"]
+    },
+    {
+      "id": "multi_instance_trading",
+      "name": "Multi-Instance Trading",
+      "description": "Support multiple trading instances per session with independent configurations and models.",
+      "examples": [
+        "Create multiple trading instances with different models",
+        "Run parallel trading strategies"
+      ],
+      "tags": ["multi-instance", "parallel", "strategies"]
+    },
+    {
+      "id": "position_management",
+      "name": "Position Management",
+      "description": "Automated position management with risk controls, stop-loss, and take-profit strategies.",
+      "examples": [
+        "Manage positions with risk controls",
+        "Set stop-loss and take-profit levels"
+      ],
+      "tags": ["position", "risk", "stop-loss", "take-profit"]
+    }
+  ],
+  "enabled": true,
+  "metadata": {
+    "version": "1.0.0",
+    "author": "ValueCell Team",
+    "tags": [
+      "trading",
+      "crypto",
+      "automated",
+      "technical-analysis"
+    ]
+  }
+}
+
+
